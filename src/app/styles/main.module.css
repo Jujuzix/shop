@@ -23,3 +23,13 @@
     box-shadow: #494949 1.95px 1.95px 2.6px;
 }
 
+.btn{
+    padding: 10px 20px;
+  background-color: #5e5e5e;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: end;
+  margin-left: 12px;
+}

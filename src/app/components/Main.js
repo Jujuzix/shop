@@ -4,59 +4,88 @@ import Image from 'next/image';
 import styles from "../styles/main.module.css";
 import { useEffect, useState } from 'react';
 import Spinner from './Spinner.js'
+import ErrorFetch from './ErrorFetch';
 
 export default function Main() {
-  const [listProduct, setProduct] = useState([]);
+  const [listProduct, setListProduct] = useState([]);
+  const [listComplete, setListComplet] = useState([]);
+  const [textSearch, setTextSearch] = useState("");
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const getProduct = async () => {
+      try{
       const response = await fetch('https://fakestoreapi.com/products/')
       const data = await response.json();
-      setProduct(data);
+      setListProduct(data);
+      setListComplet(data)
+    } 
+     catch{
+       setIsError(true);
+     }
     }
     getProduct();
   }, [])
 
   const orderAz = () => {
-    const listAux = [...listProduct].sort((a,b) => a.title.localeCompare(b.title) );
+    const listAux = [...listProduct].sort((a, b) => a.title.localeCompare(b.title));
 
-     setProduct(listAux);
+    setProduct(listAux);
   }
 
   const orderZa = () => {
-    const listAux = [...listProduct].reverse((a,b) => b.title.localeCompare(a.title) );
-    setProduct(listAux);                     
+    const listAux = [...listProduct].reverse((a, b) => b.title.localeCompare(a.title));
+    setProduct(listAux);
   }
 
   const orderPrecoMenor = () => {
-    const listPre = [...listProduct].sort((a,b) =>  a.price-b.price);
+    const listPre = [...listProduct].sort((a, b) => a.price - b.price);
 
     setProduct(listPre);
   }
 
   const orderPrecoMaior = () => {
-    const listPre = [...listProduct].reverse((a,b) =>  b.price-a.price);
+    const listPre = [...listProduct].reverse((a, b) => b.price - a.price);
 
     setProduct(listPre);
   }
 
-  if(listProduct[0] == null){
-    return <Spinner/>
+  const search = (text) => {
+    setTextSearch(text)
+
+    if (text.trim() == "") {
+      setListProduct(listComplete);
+      return
+    }
+     const newList = listProduct.filter((product) =>  
+      product.title.toUpperCase().trim().includes(textSearch.toUpperCase().trim())
+      );
+     setListProduct(newList);
+  }
+  if(isError == true){
+     return<ErrorFetch/>
+  }
+
+  if (listComplete[0] == null) {
+    return <Spinner />
   }
 
   return (
     <>
       <div className={styles.filters}>
         <div>
-          <button onClick={orderAz}  className={styles.btn}>A - Z</button>
-          <button onClick={orderZa}  className={styles.btn}>Z - A</button>
+          <input type="text" value={textSearch}
+            placeholder="Faça uma Pesquisa de Algum Produto"
+            onChange={(event) => search(event.target.value)} />
+          <button onClick={orderAz} className={styles.btn}>A - Z</button>
+          <button onClick={orderZa} className={styles.btn}>Z - A</button>
 
           <button onClick={orderPrecoMaior} className={styles.btn}> Preço Maior</button>
           <button onClick={orderPrecoMenor} className={styles.btn}> Preço Menor</button>
         </div>
       </div>
 
-      
+
 
       <main className={styles.main}>
         {listProduct.map((products) =>
